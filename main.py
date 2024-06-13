@@ -1,39 +1,44 @@
 
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
 import uvicorn
 import numpy as np
-import io
-import os
-
+import pandas as pd
+from typing import List
 import keras
 # from tensorflow.keras.models import load_model
 # from tensorflow.keras.preprocessing.image import img_to_array, load_img
 
-from app import predict_image
-from app import preprocess_image
-from app import draw_bounding_box
+from utils.predict import predict_image
+from utils.predict import preprocess_image
 
-app_desc = """<h2>Work In Progress</h2>
-<h2>sementara baru endpoint predict aja</h2>
+from utils.Recommender import NutritionCalculator
+from models import UserInput, FoodRecommendationResponse
 
-List Thing to create:
-1. Endpoint Uploaded Image with bbox (Bounding Box) contains info of predicted images (DONE)
-2. Endpoint showing nutrition
-3. Endpoint buat Recommender System (blm terlalu paham perlu re discuss lg sm anak2)
+
+#
+# with open('recommender_model.pkl', 'rb') as file:
+#     recommenderModel = pickle.load(file)
+
+
+app_desc = """
+<h2>ML API Endpoint</h2>
+
+1. Predict Image
+2. Food Recommendation System
+
 <br>by NutriLens"""
 
 app = FastAPI(title='NutriLens ML API Endpoint', description=app_desc)
 
 
 
-# model = keras.models.load_model('./models/model_MobileNetV5.h5')
+model = keras.models.load_model('./models/MobileNetV5_with_new_classes.h5')
 
-# labels_list = ["Ayam-Goreng", "Ayam-goreng-dada", "Ayam-goreng-paha", "Bakso", "Bit", "Burger",
-#                "Coto-mangkasara-kuda-masakan", "Ketoprak", "Mie-Goreng", "Mie-basah", "Nasi",
-#                "Nasi-Goreng", "Nasi-Padang", "Nasi-Uduk", "Roti-Bakar", "Roti-Putih", "Sate-Ayam",
-#                "Sate-Kambing", "Soto-betawi-masakan", "Tahu", "Tahu Telur", "Telur-Ceplok",
-#                "Tempe-Goreng", "soto-banjar-masakan"]
+labels_list = [' Ayam-Goreng', ' Bakso', ' Burger', ' Ketoprak', ' Mie-Goreng',
+       ' Mie-basah', ' Nasi', ' Nasi-Goreng', ' Nasi-Padang', ' Nasi-Uduk',
+       ' Roti-Putih', ' Sate-Ayam', ' Soto', ' Tahu', ' Tahu Telur',
+       ' Telur-Ceplok', ' Tempe-Goreng']
 
 
 # async def predict_api(file: UploadFile = File(...)):
@@ -78,40 +83,82 @@ async def predict_image_to_json(file: UploadFile = File(...)):
     #Predict the image
     predicted_class, confidence = predict_image(img_array)
 
-    #Draw bounding box on the original image
-    annotated_image_stream = draw_bounding_box(original_image, predicted_class, confidence)
+    # #Draw bounding box on the original image
+    # annotated_image_stream = draw_bounding_box(original_image, predicted_class, confidence)
 
-    # Ensure the temp directory exists
-    temp_dir = "./temp"
-    if not os.path.exists(temp_dir):
-        os.makedirs(temp_dir)
+    # # Ensure the temp directory exists
+    # temp_dir = "./temp"
+    # if not os.path.exists(temp_dir):
+    #     os.makedirs(temp_dir)
+    #
+    # #Save the uploaded image temporarily
+    # file_path = f"./temp/{file.filename}"
+    # with open(file_path, "wb") as f:
+    #     f.write(annotated_image_stream.getvalue())
 
-    #Save the uploaded image temporarily
-    file_path = f"./temp/{file.filename}"
-    with open(file_path, "wb") as f:
-        f.write(annotated_image_stream.getvalue())
+    return {"prediction: ": predicted_class,
+            "confidence: " : confidence
+            }
 
-    # Create HTML response
-    html_content = f"""
-        <html>
-            <body>
-                <h1>Prediction: {predicted_class} ({confidence:.2f}%</h1>
-                <img src="/temp/{file.filename}" alt="Uploaded Image" />
-            </body>
-        </html>
-        """
+# @app.get("/temp/{filename}")
+# async def get_image(filename: str):
+#     file_path = f"./temp/{filename}"
+#     if os.path.exists(file_path):
+#         with open(file_path, "rb") as f:
+#             return HTMLResponse(content=f.read(), media_type="image/jpeg")
+#     return JSONResponse(content={"error": "File not found"}, status_code=404)
 
-    return HTMLResponse(content=html_content)
 
-    #{"prediction: ": predicted_class}
 
-@app.get("/temp/{filename}")
-async def get_image(filename: str):
-    file_path = f"./temp/{filename}"
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            return HTMLResponse(content=f.read(), media_type="image/jpeg")
-    return JSONResponse(content={"error": "File not found"}, status_code=404)
+#THE RECOMMENDER SYSTEM
+# Load the dataset
+df = pd.read_csv("./data/nutrition.csv")  # Update this with the actual path to your CSV file
+
+@app.post("/show-recommended-foods", response_model=List[FoodRecommendationResponse])
+def show_recommended_foods(input_data: UserInput):
+    try:
+        # Extract input data
+        weight_kg = input_data.weight_kg
+        height_cm = input_data.height_cm
+        age_years = input_data.age_years
+        gender = input_data.gender
+        activity_level = input_data.activity_level
+
+        # Kalkulasi BMR
+        bmr = NutritionCalculator.calculate_bmr(weight_kg, height_cm, age_years, gender)
+
+        # Level Aktivitas
+        activity_factor = NutritionCalculator.get_activity_factor(activity_level)
+
+        # Total Kalori harian : 3 (asumsi makan 1 hari 3 kali)
+        total_calories = (bmr * activity_factor) / 10
+
+        # Kalkulasi mikro nutrisi dalam satu kali makan
+        protein_grams = np.round((total_calories * 0.50) / 4,1)  # 50% protein
+        carbohydrate_grams = np.round((total_calories * 0.20) / 9,1)  # 20% carbohydrates
+        fat_grams = np.round((total_calories * 0.30) / 4,1)  # 30% fat
+
+        # Buat kebutuhan nutrisi
+        user_preferences = np.array([total_calories, protein_grams, fat_grams, carbohydrate_grams])
+
+        recommended_foods = NutritionCalculator.recommended_food(user_preferences, df)
+
+        response = [
+            FoodRecommendationResponse(
+                name=food[0],
+                # distance=food[1],
+                calories=food[2],
+                proteins=food[3],
+                fat=food[4],
+                carbohydrate=food[5]
+            ) for food in recommended_foods[:10]
+        ]
+
+        return response
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 if __name__ == "__main__":
     uvicorn.run(app, debug=True)
