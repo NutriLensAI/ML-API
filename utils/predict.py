@@ -1,5 +1,5 @@
 import io
-import keras
+from tensorflow import keras
 import numpy as np
 
 import math
@@ -7,7 +7,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from PIL import Image, ImageDraw, ImageFont
 
-import keras
+from tensorflow import keras
 
 
 model = keras.models.load_model('./models/MobileNetV5_with_new_classes.h5')
