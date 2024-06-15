@@ -6,7 +6,7 @@ import math
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from PIL import Image, ImageDraw, ImageFont
-
+import tensorflow as tf
 from tensorflow import keras
 
 
@@ -24,7 +24,7 @@ def preprocess_image(file_content: bytes):
     image_stream = io.BytesIO(file_content)
 
     #Load the image
-    img = keras.preprocessing.image.load_img(image_stream, target_size=(224,224))
+    img =  tf.keras.preprocessing.image.load_img(image_stream, target_size=(224,224))
     img_array = keras.preprocessing.image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array = img_array / 255.0
