@@ -12,11 +12,10 @@ from tensorflow import keras
 
 model = keras.models.load_model('./models/MobileNetV5_with_new_classes.h5')
 
-labels_list = ["Ayam-Goreng", "Ayam-goreng-dada", "Ayam-goreng-paha", "Bakso", "Bit", "Burger",
-               "Coto-mangkasara-kuda-masakan", "Ketoprak", "Mie-Goreng", "Mie-basah", "Nasi",
-               "Nasi-Goreng", "Nasi-Padang", "Nasi-Uduk", "Roti-Bakar", "Roti-Putih", "Sate-Ayam",
-               "Sate-Kambing", "Soto-betawi-masakan", "Tahu", "Tahu Telur", "Telur-Ceplok",
-               "Tempe-Goreng", "soto-banjar-masakan"]
+labels_list = [' Ayam-Goreng', ' Bakso', ' Burger', ' Ketoprak', ' Mie-Goreng',
+       ' Mie-basah', ' Nasi', ' Nasi-Goreng', ' Nasi-Padang', ' Nasi-Uduk',
+       ' Roti-Putih', ' Sate-Ayam', ' Soto', ' Tahu', ' Tahu Telur',
+       ' Telur-Ceplok', ' Tempe-Goreng']
 
 
 def preprocess_image(file_content: bytes):
@@ -38,8 +37,11 @@ def preprocess_image(file_content: bytes):
 def predict_image(img_array: np.ndarray):
     # Make the prediction
     predictions = model.predict(img_array)
+    print(f"Raw predictions: {predictions}")
     predicted_class_index = np.argmax(predictions[0])
+    print(f"Predicted class index: {predicted_class_index}")
     predicted_class = labels_list[predicted_class_index]
+    print(f"Predicted class (raw): {predicted_class}")
     confidence = predictions[0][predicted_class_index] * 100
 
     return predicted_class, confidence
