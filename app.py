@@ -13,13 +13,13 @@ from tensorflow import keras
 
 
 
-model = keras.models.load_model('./models/model_MobileNetV5.h5')
+model = keras.models.load_model('./models/MobileNetV5_with_new_classes_v4.h5')
 
-labels_list = ["Ayam-Goreng", "Ayam-goreng-dada", "Ayam-goreng-paha", "Bakso", "Bit", "Burger",
-               "Coto-mangkasara-kuda-masakan", "Ketoprak", "Mie-Goreng", "Mie-basah", "Nasi",
-               "Nasi-Goreng", "Nasi-Padang", "Nasi-Uduk", "Roti-Bakar", "Roti-Putih", "Sate-Ayam",
-               "Sate-Kambing", "Soto-betawi-masakan", "Tahu", "Tahu Telur", "Telur-Ceplok",
-               "Tempe-Goreng", "soto-banjar-masakan"]
+labels_list = [' Ayam-Geprek', ' Ayam-Goreng', ' Bakso', ' Burger', ' Ketoprak',
+       ' Martabak-manis (1 Potong)', ' Mie-Goreng', ' Mie-Rebus', ' Nasi-Putih', ' Nasi-Ayam-Goreng',
+       ' Nasi-Goreng', ' Nasi-Padang', ' Nasi-Uduk', ' Nasi-Pecel-Lele',
+       ' Pecel-Sayur', ' Roti-Putih', ' Sate-Ayam', ' Soto', ' Tahu-Goreng',
+       ' Tahu-Telur', ' Telur-Ceplok', ' Tempe-Goreng', ' Ayam-kentucky']
 
 
 
