@@ -8,7 +8,7 @@ This project implements a Machine Learning API using FastAPI, providing two main
 
 ### 1. Predict Food Images
 
-![Predict-Food-Images](https://link.to.your/image.png](https://github.com/NutriLensAI/ML-API/blob/main/images/Predict.png)
+![Predict-Food-Images](https://github.com/NutriLensAI/ML-API/blob/main/images/Predict.png)
 
 - **Endpoint**: `/predict-image`
 - **Method**: POST
