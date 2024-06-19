@@ -12,11 +12,11 @@ from tensorflow import keras
 
 model = keras.models.load_model('./models/MobileNetV5_with_new_classes_v4.h5')
 
-labels_list = [' Ayam-Geprek', ' Ayam-Goreng', ' Bakso', ' Burger', ' Ketoprak',
-       ' Martabak-manis (1 Potong)', ' Mie-Goreng', ' Mie-Rebus', ' Nasi-Putih', ' Nasi-Ayam-Goreng',
-       ' Nasi-Goreng', ' Nasi-Padang', ' Nasi-Uduk', ' Nasi-Pecel-Lele',
-       ' Pecel-Sayur', ' Roti-Putih', ' Sate-Ayam', ' Soto', ' Tahu-Goreng',
-       ' Tahu-Telur', ' Telur-Ceplok', ' Tempe-Goreng', ' Ayam-kentucky']
+labels_list = ['Ayam-Geprek', 'Ayam-Goreng', 'Bakso', 'Burger', 'Ketoprak',
+       'Martabak-manis (1 Potong)', 'Mie-Goreng', 'Mie-Rebus', 'Nasi-Putih', 'Nasi-Ayam-Goreng',
+       'Nasi-Goreng', 'Nasi-Padang', 'Nasi-Uduk', 'Nasi-Pecel-Lele',
+       'Pecel-Sayur', 'Roti-Putih', 'Sate-Ayam', 'Soto', 'Tahu-Goreng',
+       'Tahu-Telur', 'Telur-Ceplok', 'Tempe-Goreng', 'Ayam-kentucky']
 
 
 def preprocess_image(file_content: bytes):
